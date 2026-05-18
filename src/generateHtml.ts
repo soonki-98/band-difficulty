@@ -3,7 +3,8 @@ import { SongEntry } from './types';
 export function generateHtml(songs: SongEntry[], generatedAt: string): string {
   const data = songs.map((s, i) => ({
     no: i + 1,
-    genre: s.genre,
+    mainGenre: s.mainGenre,
+    subGenre: s.subGenre,
     song: s.song,
     artist: s.artist,
     vocal: s.sessions.vocal ?? '-',
@@ -49,14 +50,17 @@ export function generateHtml(songs: SongEntry[], generatedAt: string): string {
 <h1>🎸 합주곡 목록</h1>
 <p class="meta">생성일시: ${generatedAt} · 총 ${songs.length}곡</p>
 <div class="filters">
-  <select id="genreFilter" onchange="filterTable()">
-    <option value="">전체 장르</option>
+  <select id="mainGenreFilter" onchange="onMainGenreChange()">
+    <option value="">전체 대분류</option>
+  </select>
+  <select id="subGenreFilter" onchange="filterTable()">
+    <option value="">전체 소분류</option>
   </select>
 </div>
 <table>
   <thead>
     <tr>
-      <th>#</th><th>장르</th><th>곡명</th><th>아티스트</th>
+      <th>#</th><th>대분류</th><th>장르</th><th>곡명</th><th>아티스트</th>
       <th>보컬</th><th>드럼</th><th>기타</th><th>베이스</th><th>건반</th><th>코러스</th>
       <th>YT</th><th>추천인</th><th>추천일시</th>
     </tr>
@@ -79,12 +83,13 @@ function diffCell(v) {
 function render(list) {
   const tbody = document.getElementById('tbody');
   if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="13" class="empty">데이터가 없습니다</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="14" class="empty">데이터가 없습니다</td></tr>';
     return;
   }
   tbody.innerHTML = list.map(s =>
     '<tr>' +
-    '<td>' + s.no + '</td><td>' + esc(s.genre) + '</td><td>' + esc(s.song) + '</td><td>' + esc(s.artist) + '</td>' +
+    '<td>' + s.no + '</td><td>' + esc(s.mainGenre) + '</td><td>' + esc(s.subGenre) + '</td>' +
+    '<td>' + esc(s.song) + '</td><td>' + esc(s.artist) + '</td>' +
     '<td>' + diffCell(s.vocal) + '</td><td>' + diffCell(s.drums) + '</td>' +
     '<td>' + diffCell(s.guitar) + '</td><td>' + diffCell(s.bass) + '</td>' +
     '<td>' + diffCell(s.keyboard) + '</td><td>' + diffCell(s.chorus) + '</td>' +
@@ -93,13 +98,29 @@ function render(list) {
     '</tr>'
   ).join('');
 }
-function filterTable() {
-  const genre = document.getElementById('genreFilter').value;
-  render(genre ? songs.filter(s => s.genre === genre) : songs);
+function onMainGenreChange() {
+  const mainGenre = document.getElementById('mainGenreFilter').value;
+  const subSel = document.getElementById('subGenreFilter');
+  subSel.innerHTML = '<option value="">전체 소분류</option>';
+  const subGenres = [...new Set(
+    songs
+      .filter(s => !mainGenre || s.mainGenre === mainGenre)
+      .map(s => s.subGenre)
+  )].sort();
+  subGenres.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; subSel.appendChild(o); });
+  filterTable();
 }
-const genres = [...new Set(songs.map(s => s.genre))].sort();
-const sel = document.getElementById('genreFilter');
-genres.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; sel.appendChild(o); });
+function filterTable() {
+  const mainGenre = document.getElementById('mainGenreFilter').value;
+  const subGenre = document.getElementById('subGenreFilter').value;
+  render(songs.filter(s =>
+    (!mainGenre || s.mainGenre === mainGenre) &&
+    (!subGenre || s.subGenre === subGenre)
+  ));
+}
+const mainGenres = [...new Set(songs.map(s => s.mainGenre))].sort();
+const mainSel = document.getElementById('mainGenreFilter');
+mainGenres.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; mainSel.appendChild(o); });
 render(songs);
 </script>
 </body>

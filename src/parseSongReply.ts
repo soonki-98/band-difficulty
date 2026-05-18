@@ -5,7 +5,7 @@ export function parseSongReply(
   recommender: string,
   slackTs: string,
   recommendedAt: string
-): Omit<SongEntry, 'genre' | 'sessions'> | null {
+): Omit<SongEntry, 'mainGenre' | 'subGenre' | 'sessions'> | null {
   const songMatch = text.match(/곡명\s*:\s*(.+)/i);
   if (!songMatch) return null;
 

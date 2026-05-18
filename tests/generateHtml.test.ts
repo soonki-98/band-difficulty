@@ -4,7 +4,8 @@ import { SongEntry } from '../src/types';
 const mockSong: SongEntry = {
   song: 'Bohemian Rhapsody',
   artist: 'Queen',
-  genre: '클래식 록',
+  mainGenre: '록',
+  subGenre: '얼터너티브 록',
   sessions: { vocal: 5, drums: 4, guitar: 4, bass: 3, keyboard: 4, chorus: 5 },
   youtubeUrl: 'https://youtu.be/abc123',
   recommender: '김민수',
@@ -17,7 +18,8 @@ test('generates valid HTML with song data', () => {
   expect(html).toContain('<!DOCTYPE html>');
   expect(html).toContain('Bohemian Rhapsody');
   expect(html).toContain('Queen');
-  expect(html).toContain('클래식 록');
+  expect(html).toContain('록');
+  expect(html).toContain('얼터너티브 록');
   expect(html).toContain('https://youtu.be/abc123');
 });
 
@@ -46,7 +48,13 @@ test('generates empty state for empty array', () => {
   expect(html).toContain('총 0곡');
 });
 
-test('includes genre in filter options', () => {
+test('includes mainGenre in main filter options', () => {
   const html = generateHtml([mockSong], '2026-05-18 14:30');
-  expect(html).toContain('클래식 록');
+  expect(html).toContain('mainGenreFilter');
+  expect(html).toContain('록');
+});
+
+test('includes subGenre in data', () => {
+  const html = generateHtml([mockSong], '2026-05-18 14:30');
+  expect(html).toContain('얼터너티브 록');
 });
