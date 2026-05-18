@@ -4,8 +4,8 @@ export function generateHtml(songs: SongEntry[], generatedAt: string): string {
   const data = songs.map((s, i) => ({
     no: i + 1,
     genre: s.genre,
-    song: escapeForJson(s.song),
-    artist: escapeForJson(s.artist),
+    song: s.song,
+    artist: s.artist,
     vocal: s.sessions.vocal ?? '-',
     drums: s.sessions.drums ?? '-',
     guitar: s.sessions.guitar ?? '-',
@@ -13,7 +13,7 @@ export function generateHtml(songs: SongEntry[], generatedAt: string): string {
     keyboard: s.sessions.keyboard ?? '-',
     chorus: s.sessions.chorus ?? '-',
     youtubeUrl: s.youtubeUrl ?? '',
-    recommender: escapeForJson(s.recommender),
+    recommender: s.recommender,
     recommendedAt: s.recommendedAt,
   }));
 
@@ -65,6 +65,13 @@ export function generateHtml(songs: SongEntry[], generatedAt: string): string {
 </table>
 <script>
 const songs = ${dataJson};
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 function diffCell(v) {
   if (v === '-') return '<span class="diff diff-none">-</span>';
   return '<span class="diff diff-' + v + '">' + v + '</span>';
@@ -77,12 +84,12 @@ function render(list) {
   }
   tbody.innerHTML = list.map(s =>
     '<tr>' +
-    '<td>' + s.no + '</td><td>' + s.genre + '</td><td>' + s.song + '</td><td>' + s.artist + '</td>' +
+    '<td>' + s.no + '</td><td>' + esc(s.genre) + '</td><td>' + esc(s.song) + '</td><td>' + esc(s.artist) + '</td>' +
     '<td>' + diffCell(s.vocal) + '</td><td>' + diffCell(s.drums) + '</td>' +
     '<td>' + diffCell(s.guitar) + '</td><td>' + diffCell(s.bass) + '</td>' +
     '<td>' + diffCell(s.keyboard) + '</td><td>' + diffCell(s.chorus) + '</td>' +
-    '<td>' + (s.youtubeUrl ? '<a class="yt" href="' + s.youtubeUrl + '" target="_blank">▶</a>' : '') + '</td>' +
-    '<td>' + s.recommender + '</td><td>' + s.recommendedAt + '</td>' +
+    '<td>' + (s.youtubeUrl && s.youtubeUrl.startsWith('https://') ? '<a class="yt" href="' + esc(s.youtubeUrl) + '" target="_blank">▶</a>' : '') + '</td>' +
+    '<td>' + esc(s.recommender) + '</td><td>' + esc(s.recommendedAt) + '</td>' +
     '</tr>'
   ).join('');
 }
@@ -97,12 +104,4 @@ render(songs);
 </script>
 </body>
 </html>`;
-}
-
-function escapeForJson(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 }

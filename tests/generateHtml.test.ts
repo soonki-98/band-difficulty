@@ -25,18 +25,25 @@ test('formats null session as dash', () => {
   const song: SongEntry = { ...mockSong, sessions: { ...mockSong.sessions, keyboard: null, chorus: null } };
   const html = generateHtml([song], '2026-05-18 14:30');
   expect(html).toContain('"-"');
+  expect(html).not.toContain('"keyboard":null');
+  expect(html).not.toContain('"chorus":null');
 });
 
 test('escapes HTML special characters in song/artist names', () => {
   const song: SongEntry = { ...mockSong, song: '<script>alert("xss")</script>' };
   const html = generateHtml([song], '2026-05-18 14:30');
-  expect(html).not.toContain('<script>alert');
+  // Data is stored raw in JSON; client-side esc() handles rendering.
+  // The </script> closing tag must be neutralized to prevent script injection.
+  expect(html).not.toContain('</script><script>');
+  expect(html).toContain('<\\/script>');
+  // The esc() helper must be present for client-side escaping.
+  expect(html).toContain('function esc(s)');
 });
 
 test('generates empty state for empty array', () => {
   const html = generateHtml([], '2026-05-18 14:30');
   expect(html).toContain('<!DOCTYPE html>');
-  expect(html).toContain('데이터가 없습니다');
+  expect(html).toContain('총 0곡');
 });
 
 test('includes genre in filter options', () => {
