@@ -2,17 +2,11 @@
   "name": "band-song-sheet",
   "version": "1.0.0",
   "description": "Sync band song recommendations from Slack to Google Sheets",
-  "main": "dist/sync.js",
   "scripts": {
-    "sync": "ts-node src/sync.ts",
-    "init-sheet": "ts-node src/initSheet.ts",
     "test": "jest",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "dotenv": "^16.0.0",
-    "googleapis": "^144.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/jest": "^29.0.0",
     "@types/node": "^20.0.0",
