@@ -38,9 +38,7 @@ export function generateHtml(songs: SongEntry[], generatedAt: string): string {
   td { padding: 10px 12px; font-size: 0.875rem; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: #fafafa; }
-  .diff { display: inline-block; width: 20px; text-align: center; font-weight: 700; }
-  .diff-1 { color: #22c55e; } .diff-2 { color: #84cc16; } .diff-3 { color: #eab308; }
-  .diff-4 { color: #f97316; } .diff-5 { color: #ef4444; }
+  .diff { display: inline-block; min-width: 28px; text-align: center; font-weight: 700; font-size: 0.8rem; }
   .diff-none { color: #ccc; font-weight: 400; }
   a.yt { color: #ff0000; text-decoration: none; font-size: 1.1rem; }
   .empty { text-align: center; padding: 40px; color: #aaa; }
@@ -78,7 +76,11 @@ function esc(s) {
 }
 function diffCell(v) {
   if (v === '-') return '<span class="diff diff-none">-</span>';
-  return '<span class="diff diff-' + v + '">' + v + '</span>';
+  var n = Number(v);
+  // green(120°) → yellow(60°) → red(0°) based on 1-100 scale
+  var hue = Math.round(120 - (n - 1) / 99 * 120);
+  var color = 'hsl(' + hue + ',85%,40%)';
+  return '<span class="diff" style="color:' + color + '">' + v + '</span>';
 }
 function render(list) {
   const tbody = document.getElementById('tbody');

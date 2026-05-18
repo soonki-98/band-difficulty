@@ -6,7 +6,7 @@ const mockSong: SongEntry = {
   artist: 'Queen',
   mainGenre: '록',
   subGenre: '얼터너티브 록',
-  sessions: { vocal: 5, drums: 4, guitar: 4, bass: 3, keyboard: 4, chorus: 5 },
+  sessions: { vocal: 90, drums: 75, guitar: 70, bass: 55, keyboard: 70, chorus: 85 },
   youtubeUrl: 'https://youtu.be/abc123',
   recommender: '김민수',
   recommendedAt: '2026-05-18 14:30',
