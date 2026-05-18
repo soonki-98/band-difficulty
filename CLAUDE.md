@@ -1,6 +1,6 @@
 # Band Song Sheet
 
-Slack #club_band 합주곡 추천 스레드의 댓글을 분석하여 Google Sheets로 동기화하는 프로젝트.
+Slack #club_band 합주곡 추천 스레드의 댓글을 분석하여 output.html로 출력하는 프로젝트.
 모든 처리는 Claude Code + MCP로 이루어지며, 별도 credentials 불필요.
 
 ## 싱크 워크플로 (수동 실행)
@@ -18,7 +18,7 @@ Slack #club_band 합주곡 추천 스레드의 댓글을 분석하여 Google She
 각 댓글에서 아래 패턴을 추출한다:
 - `곡명\s*:\s*(.+)` → song
 - `가수명\s*:\s*(.+)` → artist
-- `링크\s*:\s*(https?://\S+)` → youtubeUrl (없으면 빈 문자열)
+- `링크\s*:\s*(https?://\S+)` → youtubeUrl (없으면 null)
 
 곡명 또는 가수명이 없으면 skip (안내 댓글, 일반 대화 등 제외).
 
@@ -28,48 +28,34 @@ Slack #club_band 합주곡 추천 스레드의 댓글을 분석하여 Google She
 
 **장르** (genre): 한국어로 짧게 (예: "얼터너티브 록", "J-POP", "인디")
 
-**세션별 숙련도** (sessions): 이 곡을 연주하는 데 필요한 기술 수준
+**세션별 숙련도** (sessions):
 - vocal, drums, guitar, bass, keyboard, chorus
 - 1(매우 쉬움) ~ 5(매우 어려움)
-- 해당 세션이 곡에서 불필요하거나 비중이 없으면 `-`
+- 해당 세션이 곡에서 불필요하거나 비중이 없으면 null
 
-밴드 세션: 보컬(vocal), 드럼(drums), 기타(guitar), 베이스(bass), 건반(keyboard), 코러스(chorus)
+### Step 4: HTML 파일 생성
 
-### Step 4: Google Sheet 생성
+분석된 전체 곡 목록으로 generateHtml 함수를 호출하여 output.html을 생성한다.
 
-분석된 전체 곡 목록을 CSV로 만들고 `mcp__claude_ai_Google_Drive__create_file`로 새 Google Sheets 파일을 생성한다.
-
-**CSV 헤더 (고정):**
+```typescript
+import { generateHtml } from './src/generateHtml';
+import * as fs from 'fs';
+const generatedAt = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+const html = generateHtml(songs, generatedAt);
+fs.writeFileSync('output.html', html, 'utf-8');
 ```
-번호,장르,곡명,아티스트,보컬,드럼,기타,베이스,건반,코러스,YouTube링크,추천인,추천일시
-```
 
-**create_file 파라미터:**
-- `title`: `합주곡 목록 YYYY-MM-DD` (싱크 날짜 포함)
-- `contentMimeType`: `text/csv`
-- `textContent`: CSV 전체 내용 (헤더 + 데이터 행)
+완료 후 `open output.html`로 브라우저에서 열어 결과를 확인한다.
 
-완료 후 생성된 파일의 URL을 사용자에게 전달한다.
+## 공유 방법
 
-## 컬럼 순서
+output.html 파일을 Slack에 파일로 첨부하면 밴드원들이 다운로드해서 열람 가능.
 
-| 열 | 헤더 | 내용 |
-|---|---|---|
-| A | 번호 | 1부터 순차 증가 |
-| B | 장르 | AI 추론 |
-| C | 곡명 | Slack 파싱 |
-| D | 아티스트 | Slack 파싱 |
-| E | 보컬 | 1-5 또는 `-` |
-| F | 드럼 | 1-5 또는 `-` |
-| G | 기타 | 1-5 또는 `-` |
-| H | 베이스 | 1-5 또는 `-` |
-| I | 건반 | 1-5 또는 `-` |
-| J | 코러스 | 1-5 또는 `-` |
-| K | YouTube링크 | Slack 파싱 |
-| L | 추천인 | Slack display_name |
-| M | 추천일시 | KST (YYYY-MM-DD HH:mm) |
+## 컬럼 구성
+
+보컬, 드럼, 기타, 베이스, 건반, 코러스 (숙련도 1-5, 없으면 -)
 
 ## 주의사항
 
-- 싱크할 때마다 새 Google Sheet가 생성된다 (이전 시트는 그대로 유지)
+- output.html은 sync 실행 시 덮어쓰기 (항상 최신 데이터)
 - credentials, .env, service-account.json 불필요
