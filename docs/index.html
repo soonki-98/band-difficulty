@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>합주곡 목록</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #333; padding: 24px; }
+  h1 { font-size: 1.5rem; margin-bottom: 4px; }
+  .meta { color: #888; font-size: 0.875rem; margin-bottom: 16px; }
+  .filters { margin-bottom: 16px; }
+  .filters select { padding: 6px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.875rem; background: white; }
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  th { background: #1a1a2e; color: white; padding: 10px 12px; text-align: left; font-size: 0.8rem; white-space: nowrap; }
+  td { padding: 10px 12px; font-size: 0.875rem; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafafa; }
+  .diff { display: inline-block; min-width: 28px; text-align: center; font-weight: 700; font-size: 0.8rem; }
+  .diff-none { color: #ccc; font-weight: 400; }
+  a.yt { color: #ff0000; text-decoration: none; font-size: 1.1rem; }
+  .empty { text-align: center; padding: 40px; color: #aaa; }
+</style>
+</head>
+<body>
+<h1>🎸 합주곡 목록</h1>
+<p class="meta">생성일시: 2026. 5. 18. PM 5:47:44 · 총 25곡</p>
+<div class="filters">
+  <select id="mainGenreFilter" onchange="onMainGenreChange()">
+    <option value="">전체 대분류</option>
+  </select>
+  <select id="subGenreFilter" onchange="filterTable()">
+    <option value="">전체 소분류</option>
+  </select>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>#</th><th>대분류</th><th>장르</th><th>곡명</th><th>아티스트</th>
+      <th>보컬</th><th>드럼</th><th>기타</th><th>베이스</th><th>건반</th><th>코러스</th>
+      <th>YT</th><th>추천인</th><th>추천일시</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+<script>
+const songs = [{"no":1,"mainGenre":"록","subGenre":"얼터너티브 록","song":"Time Is Running Out","artist":"Muse","vocal":55,"drums":55,"guitar":45,"bass":70,"keyboard":20,"chorus":"-","youtubeUrl":"https://youtu.be/O2IuJPh6h_A","recommender":"민순기","recommendedAt":"2026-05-18 14:52"},{"no":2,"mainGenre":"팝","subGenre":"케이팝","song":"HAPPY","artist":"데이식스","vocal":45,"drums":40,"guitar":38,"bass":35,"keyboard":30,"chorus":30,"youtubeUrl":"https://www.youtube.com/watch?v=sWXGbkM0tBI","recommender":"박채영","recommendedAt":"2026-05-18 14:57"},{"no":3,"mainGenre":"록","subGenre":"한국 록","song":"나는 나비","artist":"YB","vocal":60,"drums":50,"guitar":50,"bass":38,"keyboard":"-","chorus":"-","youtubeUrl":"https://www.youtube.com/watch?v=03tKh-FhkfY","recommender":"박채영","recommendedAt":"2026-05-18 14:57"},{"no":4,"mainGenre":"록","subGenre":"디스코 펑크","song":"Shining Road","artist":"술탄오브더디스코","vocal":45,"drums":48,"guitar":42,"bass":45,"keyboard":42,"chorus":30,"youtubeUrl":"https://youtu.be/XxPChilanF8","recommender":"박지영","recommendedAt":"2026-05-18 15:00"},{"no":5,"mainGenre":"록","subGenre":"얼터너티브 록","song":"Viva La Vida","artist":"Coldplay","vocal":48,"drums":40,"guitar":30,"bass":35,"keyboard":50,"chorus":55,"youtubeUrl":"https://youtu.be/dvgZkm1xWPE","recommender":"민순기","recommendedAt":"2026-05-18 15:15"},{"no":6,"mainGenre":"인디","subGenre":"인디 록","song":"No Pain","artist":"실리카겔","vocal":55,"drums":55,"guitar":58,"bass":48,"keyboard":38,"chorus":"-","youtubeUrl":"https://youtu.be/JaIMSzE5yLA","recommender":"양호준","recommendedAt":"2026-05-18 15:15"},{"no":7,"mainGenre":"팝","subGenre":"J-POP","song":"踊り子 (Odoriko)","artist":"Vaundy","vocal":52,"drums":38,"guitar":40,"bass":35,"keyboard":42,"chorus":"-","youtubeUrl":"https://youtu.be/7HgJIAUtICU","recommender":"민순기","recommendedAt":"2026-05-18 15:16"},{"no":8,"mainGenre":"인디","subGenre":"인디 록","song":"Desert Eagle","artist":"실리카겔","vocal":55,"drums":58,"guitar":60,"bass":52,"keyboard":40,"chorus":"-","youtubeUrl":"https://youtu.be/9g4Owyy-FDU","recommender":"박지영","recommendedAt":"2026-05-18 15:16"},{"no":9,"mainGenre":"록","subGenre":"J-록","song":"사무라이 하트 (Some Like It Hot)","artist":"SPYAIR","vocal":65,"drums":62,"guitar":52,"bass":42,"keyboard":"-","chorus":30,"youtubeUrl":"https://youtu.be/eMa_cXrnVgw","recommender":"양호준","recommendedAt":"2026-05-18 15:17"},{"no":10,"mainGenre":"록","subGenre":"J-록","song":"Wherever You Are","artist":"ONE OK ROCK","vocal":65,"drums":58,"guitar":48,"bass":42,"keyboard":38,"chorus":42,"youtubeUrl":"https://youtu.be/bFuh3XgXHPo","recommender":"민순기","recommendedAt":"2026-05-18 15:18"},{"no":11,"mainGenre":"인디","subGenre":"인디 팝","song":"Far Away","artist":"라쿠나","vocal":42,"drums":32,"guitar":35,"bass":28,"keyboard":35,"chorus":"-","youtubeUrl":"https://youtu.be/Rc2KX21Kcwk","recommender":"박지영","recommendedAt":"2026-05-18 15:19"},{"no":12,"mainGenre":"록","subGenre":"J-록","song":"白日","artist":"King Gnu","vocal":85,"drums":62,"guitar":55,"bass":52,"keyboard":68,"chorus":42,"youtubeUrl":"https://youtu.be/ony539T074w","recommender":"박지영","recommendedAt":"2026-05-18 15:20"},{"no":13,"mainGenre":"팝","subGenre":"케이팝","song":"예뻐어","artist":"데이식스","vocal":48,"drums":40,"guitar":38,"bass":35,"keyboard":32,"chorus":30,"youtubeUrl":"https://youtu.be/BS7tz2rAOSA","recommender":"권민관","recommendedAt":"2026-05-18 15:21"},{"no":14,"mainGenre":"팝","subGenre":"케이팝","song":"Welcome to the Show","artist":"데이식스","vocal":50,"drums":45,"guitar":42,"bass":42,"keyboard":38,"chorus":32,"youtubeUrl":"https://youtu.be/RowlrvmyFEk","recommender":"권민관","recommendedAt":"2026-05-18 15:21"},{"no":15,"mainGenre":"인디","subGenre":"인디 팝","song":"언제나 여름","artist":"라쿠나","vocal":38,"drums":28,"guitar":32,"bass":25,"keyboard":32,"chorus":"-","youtubeUrl":"https://www.youtube.com/watch?v=V233H7H5qgI","recommender":"홍빈 김","recommendedAt":"2026-05-18 15:22"},{"no":16,"mainGenre":"인디","subGenre":"인디 팝","song":"사랑으로","artist":"wave to earth","vocal":38,"drums":32,"guitar":32,"bass":32,"keyboard":38,"chorus":"-","youtubeUrl":"https://www.youtube.com/watch?v=L7cAqBQVjYI","recommender":"홍빈 김","recommendedAt":"2026-05-18 15:23"},{"no":17,"mainGenre":"인디","subGenre":"인디 포크","song":"이웃에 방해가 되지 않는 선에서","artist":"브로콜리너마저","vocal":28,"drums":20,"guitar":25,"bass":20,"keyboard":22,"chorus":"-","youtubeUrl":"https://www.youtube.com/watch?v=kyIChB8CgnA","recommender":"홍빈 김","recommendedAt":"2026-05-18 15:25"},{"no":18,"mainGenre":"록","subGenre":"팝 펑크","song":"Basket Case","artist":"Green Day","vocal":45,"drums":62,"guitar":42,"bass":50,"keyboard":"-","chorus":32,"youtubeUrl":"https://youtu.be/NUTGr5t3MoY","recommender":"양호준","recommendedAt":"2026-05-18 15:26"},{"no":19,"mainGenre":"록","subGenre":"한국 록","song":"Butterfly","artist":"전영호","vocal":52,"drums":45,"guitar":55,"bass":35,"keyboard":"-","chorus":"-","youtubeUrl":"https://youtu.be/rGRC_Nf8fww","recommender":"민순기","recommendedAt":"2026-05-18 15:28"},{"no":20,"mainGenre":"록","subGenre":"펑크 록","song":"Dark Necessities","artist":"Red Hot Chili Peppers","vocal":45,"drums":55,"guitar":52,"bass":78,"keyboard":"-","chorus":32,"youtubeUrl":"https://youtu.be/qJ_Tw0w3lLA","recommender":"박지영","recommendedAt":"2026-05-18 15:28"},{"no":21,"mainGenre":"팝","subGenre":"케이팝","song":"바래","artist":"FT 아일랜드","vocal":65,"drums":42,"guitar":48,"bass":35,"keyboard":32,"chorus":"-","youtubeUrl":"https://www.youtube.com/watch?v=I8XlC4ASKqQ","recommender":"윤서현","recommendedAt":"2026-05-18 15:41"},{"no":22,"mainGenre":"팝","subGenre":"J-POP","song":"Pretender","artist":"Official髭男dism","vocal":82,"drums":48,"guitar":48,"bass":42,"keyboard":65,"chorus":35,"youtubeUrl":"https://youtu.be/TQ8WlA2GXbk","recommender":"이소민","recommendedAt":"2026-05-18 16:20"},{"no":23,"mainGenre":"인디","subGenre":"한국 인디","song":"Children","artist":"이희상","vocal":48,"drums":32,"guitar":38,"bass":35,"keyboard":42,"chorus":"-","youtubeUrl":"https://youtu.be/ssy6sewzeBI","recommender":"이소민","recommendedAt":"2026-05-18 16:23"},{"no":24,"mainGenre":"인디","subGenre":"인디 팝","song":"Seasons","artist":"wave to earth","vocal":42,"drums":30,"guitar":35,"bass":30,"keyboard":35,"chorus":"-","youtubeUrl":"https://youtu.be/nZqwQCLYgjk","recommender":"이소민","recommendedAt":"2026-05-18 16:30"},{"no":25,"mainGenre":"록","subGenre":"브릿팝","song":"Don't Look Back in Anger","artist":"Oasis","vocal":42,"drums":35,"guitar":35,"bass":30,"keyboard":45,"chorus":50,"youtubeUrl":"https://youtu.be/cmpRLQZkTb8","recommender":"민순기","recommendedAt":"2026-05-18 17:09"}];
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+function diffCell(v) {
+  if (v === '-') return '<span class="diff diff-none">-</span>';
+  var n = Number(v);
+  // green(120°) → yellow(60°) → red(0°) based on 1-100 scale
+  var hue = Math.round(120 - (n - 1) / 99 * 120);
+  var color = 'hsl(' + hue + ',85%,40%)';
+  return '<span class="diff" style="color:' + color + '">' + v + '</span>';
+}
+function render(list) {
+  const tbody = document.getElementById('tbody');
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="14" class="empty">데이터가 없습니다</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(s =>
+    '<tr>' +
+    '<td>' + s.no + '</td><td>' + esc(s.mainGenre) + '</td><td>' + esc(s.subGenre) + '</td>' +
+    '<td>' + esc(s.song) + '</td><td>' + esc(s.artist) + '</td>' +
+    '<td>' + diffCell(s.vocal) + '</td><td>' + diffCell(s.drums) + '</td>' +
+    '<td>' + diffCell(s.guitar) + '</td><td>' + diffCell(s.bass) + '</td>' +
+    '<td>' + diffCell(s.keyboard) + '</td><td>' + diffCell(s.chorus) + '</td>' +
+    '<td>' + (s.youtubeUrl && s.youtubeUrl.startsWith('https://') ? '<a class="yt" href="' + esc(s.youtubeUrl) + '" target="_blank">▶</a>' : '') + '</td>' +
+    '<td>' + esc(s.recommender) + '</td><td>' + esc(s.recommendedAt) + '</td>' +
+    '</tr>'
+  ).join('');
+}
+function onMainGenreChange() {
+  const mainGenre = document.getElementById('mainGenreFilter').value;
+  const subSel = document.getElementById('subGenreFilter');
+  subSel.innerHTML = '<option value="">전체 소분류</option>';
+  const subGenres = [...new Set(
+    songs
+      .filter(s => !mainGenre || s.mainGenre === mainGenre)
+      .map(s => s.subGenre)
+  )].sort();
+  subGenres.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; subSel.appendChild(o); });
+  filterTable();
+}
+function filterTable() {
+  const mainGenre = document.getElementById('mainGenreFilter').value;
+  const subGenre = document.getElementById('subGenreFilter').value;
+  render(songs.filter(s =>
+    (!mainGenre || s.mainGenre === mainGenre) &&
+    (!subGenre || s.subGenre === subGenre)
+  ));
+}
+const mainGenres = [...new Set(songs.map(s => s.mainGenre))].sort();
+const mainSel = document.getElementById('mainGenreFilter');
+mainGenres.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; mainSel.appendChild(o); });
+render(songs);
+</script>
+</body>
+</html>

@@ -1,7 +1,9 @@
 # Band Song Sheet
 
-Slack #club_band 합주곡 추천 스레드의 댓글을 분석하여 output.html로 출력하는 프로젝트.
+Slack #club_band 합주곡 추천 스레드의 댓글을 분석하여 GitHub Pages로 퍼블리싱하는 프로젝트.
 모든 처리는 Claude Code + MCP로 이루어지며, 별도 credentials 불필요.
+
+GitHub Pages URL: https://soonki-98.github.io/band-difficulty/
 
 ## 싱크 워크플로 (수동 실행)
 
@@ -104,29 +106,40 @@ YouTube 커버 영상 댓글, Ultimate Guitar 난이도 태그, 연주 튜토리
 | 61~80 | 복잡한 하모니, 넓은 음역 필요 |
 | 81~100 | 극도로 복잡한 보컬 하모니, 클래식 합창 수준 |
 
-### Step 5: HTML 파일 생성
+### Step 5: HTML 파일 생성 및 배포
 
-분석된 전체 곡 목록으로 generateHtml 함수를 호출하여 output.html을 생성한다.
+분석된 전체 곡 목록으로 generateHtml 함수를 호출하여 `docs/index.html`을 생성한다.
 
 ```typescript
 import { generateHtml } from './src/generateHtml';
 import * as fs from 'fs';
 const generatedAt = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
 const html = generateHtml(songs, generatedAt);
-fs.writeFileSync('output.html', html, 'utf-8');
+fs.mkdirSync('docs', { recursive: true });
+fs.writeFileSync('docs/index.html', html, 'utf-8');
 ```
 
-완료 후 `open output.html`로 브라우저에서 열어 결과를 확인한다.
+완료 후 아래 순서로 배포한다:
+
+```bash
+open docs/index.html   # 브라우저에서 로컬 확인
+git add docs/index.html
+git commit -m "chore: sync song list"
+git push
+```
+
+푸시 후 약 1분 뒤 https://soonki-98.github.io/band-difficulty/ 에서 확인 가능.
 
 ## 공유 방법
 
-output.html 파일을 Slack에 파일로 첨부하면 밴드원들이 다운로드해서 열람 가능.
+GitHub Pages URL을 Slack에 공유하면 밴드원들이 바로 열람 가능:
+https://soonki-98.github.io/band-difficulty/
 
 ## 컬럼 구성
 
-보컬, 드럼, 기타, 베이스, 건반, 코러스 (숙련도 1-5, 없으면 -)
+보컬, 드럼, 기타, 베이스, 건반, 코러스 (숙련도 1-100, 없으면 -)
 
 ## 주의사항
 
-- output.html은 sync 실행 시 덮어쓰기 (항상 최신 데이터)
+- docs/index.html은 sync 실행 시 덮어쓰기 (항상 최신 데이터)
 - credentials, .env, service-account.json 불필요
