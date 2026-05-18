@@ -3,3 +3,5 @@ dist/
 .env
 service-account.json
 tokens.json
+*.log
+.DS_Store
