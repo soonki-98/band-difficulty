@@ -52,6 +52,11 @@ export function generateHtml(songs: SongEntry[], generatedAt: string): string {
   .diff-none { color: #ccc; font-weight: 400; }
   a.yt { color: #ff0000; text-decoration: none; font-size: 1.1rem; }
   .empty { text-align: center; padding: 40px; color: #aaa; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable:hover { background: #2a2a4e; }
+  th.sort-active { background: #2d2d5e; }
+  .sort-ind { opacity: 0.45; font-size: 0.65rem; margin-left: 3px; }
+  th.sort-active .sort-ind { opacity: 1; }
 </style>
 </head>
 <body>
@@ -133,9 +138,19 @@ export function generateHtml(songs: SongEntry[], generatedAt: string): string {
 <table>
   <thead>
     <tr>
-      <th>#</th><th>대분류</th><th>장르</th><th>곡명</th><th>아티스트</th>
-      <th>보컬</th><th>드럼</th><th>기타</th><th>베이스</th><th>건반</th><th>코러스</th>
-      <th>YT</th><th>추천인</th><th>추천일시</th>
+      <th>#</th>
+      <th class="sortable" data-sort="mainGenre" onclick="sortBy('mainGenre')">대분류<span class="sort-ind">↕</span></th>
+      <th class="sortable" data-sort="subGenre" onclick="sortBy('subGenre')">장르<span class="sort-ind">↕</span></th>
+      <th>곡명</th><th>아티스트</th>
+      <th class="sortable" data-sort="vocal" onclick="sortBy('vocal')">보컬<span class="sort-ind">↕</span></th>
+      <th class="sortable" data-sort="drums" onclick="sortBy('drums')">드럼<span class="sort-ind">↕</span></th>
+      <th class="sortable" data-sort="guitar" onclick="sortBy('guitar')">기타<span class="sort-ind">↕</span></th>
+      <th class="sortable" data-sort="bass" onclick="sortBy('bass')">베이스<span class="sort-ind">↕</span></th>
+      <th class="sortable" data-sort="keyboard" onclick="sortBy('keyboard')">건반<span class="sort-ind">↕</span></th>
+      <th class="sortable" data-sort="chorus" onclick="sortBy('chorus')">코러스<span class="sort-ind">↕</span></th>
+      <th>YT</th>
+      <th class="sortable" data-sort="recommender" onclick="sortBy('recommender')">추천인<span class="sort-ind">↕</span></th>
+      <th class="sortable" data-sort="recommendedAt" onclick="sortBy('recommendedAt')">추천일시<span class="sort-ind">↕</span></th>
     </tr>
   </thead>
   <tbody id="tbody"></tbody>
@@ -175,6 +190,23 @@ function render(list) {
     '</tr>'
   ).join('');
 }
+var sortCol = null;
+var sortDir = 1;
+function sortBy(col) {
+  if (sortCol === col) { sortDir = -sortDir; } else { sortCol = col; sortDir = 1; }
+  document.querySelectorAll('th[data-sort]').forEach(function(th) {
+    th.classList.remove('sort-active');
+    th.querySelector('.sort-ind').textContent = '↕';
+  });
+  var el = document.querySelector('th[data-sort="' + col + '"]');
+  el.classList.add('sort-active');
+  el.querySelector('.sort-ind').textContent = sortDir === 1 ? '↑' : '↓';
+  filterTable();
+}
+function getSortVal(s, col) {
+  var v = s[col];
+  return v === '-' ? null : v;
+}
 function onMainGenreChange() {
   const mainGenre = document.getElementById('mainGenreFilter').value;
   const subSel = document.getElementById('subGenreFilter');
@@ -190,10 +222,21 @@ function onMainGenreChange() {
 function filterTable() {
   const mainGenre = document.getElementById('mainGenreFilter').value;
   const subGenre = document.getElementById('subGenreFilter').value;
-  render(songs.filter(s =>
+  var list = songs.filter(s =>
     (!mainGenre || s.mainGenre === mainGenre) &&
     (!subGenre || s.subGenre === subGenre)
-  ));
+  );
+  if (sortCol) {
+    list = list.slice().sort(function(a, b) {
+      var av = getSortVal(a, sortCol), bv = getSortVal(b, sortCol);
+      if (av === null && bv === null) return 0;
+      if (av === null) return 1;
+      if (bv === null) return -1;
+      if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * sortDir;
+      return String(av).localeCompare(String(bv), 'ko') * sortDir;
+    });
+  }
+  render(list);
 }
 const mainGenres = [...new Set(songs.map(s => s.mainGenre))].sort();
 const mainSel = document.getElementById('mainGenreFilter');
