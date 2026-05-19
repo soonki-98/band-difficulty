@@ -38,9 +38,11 @@ description: Use when scoring drum difficulty for band song sync - extracts BPM 
 | 81~100 | BPM 200+, 블라스트 비트, 극도로 복잡한 폴리리듬 |
 
 > 참고 앵커:
-> - Queen - We Will Rock You: ~15 (BPM 81, 극히 단순한 패턴)
+> - Queen - We Will Rock You: ~15 (BPM 81, 극히 단순한 패턴, Beginner 예외 적용)
 > - The Beatles - Let It Be: ~18 (BPM 73, 매우 단순)
+> - Radiohead - Creep: ~18 (BPM 93, 기본 비트, Beginner/Easy → Beginner 예외 적용)
 > - Nirvana - Smells Like Teen Spirit: ~25 (BPM 117, 기본 비트, 단순 필)
+> - AC/DC - Back in Black: ~25 (BPM 93, 기본 비트, Beginner-Intermediate → 예외 미적용, 하한 21)
 > - Green Day - Basket Case: ~32 (BPM 172이지만 패턴 단순, 펑크 스트레이트)
 > - Vaundy - Odoriko: ≥41 (BPM 157, 기본 16비트)
 > - System of a Down - Chop Suey: ~55 (박자 변환, 복잡한 필)
@@ -58,6 +60,11 @@ BPM이 확인된 경우 점수는 해당 BPM 밴드의 하한 이상이어야 �
 - BPM 120~160 → 41 이상
 - BPM 160~200 → 61 이상
 - BPM 200+ → 81 이상
+
+**단, 아래 조건을 모두 충족하면 BPM 80~120의 하한을 15까지 허용 (Beginner 예외):**
+- 비트 패턴이 4/4 기본 비트 (싱코페이션/16비트/복잡한 필 없음)
+- 튜토리얼 레벨이 Beginner로 확인
+- 커뮤니티 평가가 Easy로 확인
 
 **제약 2: 외부 레이블 범위 제약**
 
